@@ -15,11 +15,6 @@ router = Router()
 class TopUpFSM(StatesGroup):
     waiting_for_amount = State()
 
-def main_kb():
-    return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="💰 Пополнить")]],
-        resize_keyboard=True
-    )
 
 def cancel_kb():
     return ReplyKeyboardMarkup(
