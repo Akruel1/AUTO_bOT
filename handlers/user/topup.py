@@ -33,7 +33,7 @@ async def topup_start(message: Message, state: FSMContext):
 @router.message(TopUpFSM.waiting_for_amount, F.text.lower() == "отменить")
 async def cancel_topup(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer("❌ Пополнение отменено.", reply_markup=main_menu_kb())
+    await message.answer("❌ Пополнение отменено.", reply_markup=main_menu_kb(user_id))
 
 @router.message(TopUpFSM.waiting_for_amount)
 async def topup_amount_entered(message: Message, state: FSMContext):
@@ -86,7 +86,7 @@ async def topup_amount_entered(message: Message, state: FSMContext):
         f"🪙 На адрес:\n<code>{admin_user.wallet_address}</code>\n\n"
         f"⚠️ Заявка будет проверяться в течение часа. "
         f"После подтверждения баланс пополнится автоматически.",
-        reply_markup=main_menu_kb()
+        reply_markup=main_menu_kb(user_id)
     )
 
     await state.clear()
