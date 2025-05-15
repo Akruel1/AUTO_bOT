@@ -15,23 +15,30 @@ router = Router()
 class TopUpFSM(StatesGroup):
     waiting_for_amount = State()
 
-# Кнопка "Отменить"
-cancel_kb = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="Отменить")]],
-    resize_keyboard=True,
-    one_time_keyboard=True,
-)
+def main_kb():
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="💰 Пополнить")]],
+        resize_keyboard=True
+    )
+
+def cancel_kb():
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Отменить")]],
+        resize_keyboard=True
+    )
 
 @router.message(F.text == "💰 Пополнить")
 async def topup_start(message: Message, state: FSMContext):
-    await message.answer("Введите сумму пополнения в <b>USD</b>:", reply_markup=cancel_kb)
+    await message.answer(
+        "Введите сумму пополнения в <b>USD</b>:", 
+        reply_markup=cancel_kb()
+    )
     await state.set_state(TopUpFSM.waiting_for_amount)
 
-# Обработчик отмены
-@router.message(F.text.lower() == "отменить", TopUpFSM.waiting_for_amount)
+@router.message(TopUpFSM.waiting_for_amount, F.text.lower() == "отменить")
 async def cancel_topup(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer("❌ Пополнение отменено.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="💰 Пополнить")))
+    await message.answer("❌ Пополнение отменено.", reply_markup=main_kb())
 
 @router.message(TopUpFSM.waiting_for_amount)
 async def topup_amount_entered(message: Message, state: FSMContext):
@@ -40,19 +47,19 @@ async def topup_amount_entered(message: Message, state: FSMContext):
         if amount_usd < 1:
             raise ValueError
     except ValueError:
-        await message.answer("❗ Введите корректную сумму (минимум 1 USD).", reply_markup=cancel_kb)
+        await message.answer("❗ Введите корректную сумму (минимум 1 USD). Или напишите 'Отменить' для выхода.")
         return
 
     # Получаем курс LTC/USD с CoinGecko
     async with aiohttp.ClientSession() as session:
         async with session.get("https://api.coingecko.com/api/v3/simple/price?ids=litecoin&vs_currencies=usd") as resp:
             if resp.status != 200:
-                await message.answer("⚠️ Не удалось получить курс LTC. Попробуйте позже.", reply_markup=cancel_kb)
+                await message.answer("⚠️ Не удалось получить курс LTC. Попробуйте позже.")
                 return
             data = await resp.json()
             ltc_usd = data.get("litecoin", {}).get("usd")
             if ltc_usd is None:
-                await message.answer("⚠️ Курс LTC временно недоступен.", reply_markup=cancel_kb)
+                await message.answer("⚠️ Курс LTC временно недоступен.")
                 return
 
     amount_ltc = round(amount_usd / ltc_usd, 8)
@@ -63,7 +70,7 @@ async def topup_amount_entered(message: Message, state: FSMContext):
         result = await session.execute(select(User).where(User.tg_id == admin_tg_id))
         admin_user = result.scalar_one_or_none()
         if not admin_user or not admin_user.wallet_address:
-            await message.answer("⚠️ Кошелек для пополнения не установлен. Обратитесь к администратору.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="💰 Пополнить")))
+            await message.answer("⚠️ Кошелек для пополнения не установлен. Обратитесь к администратору.")
             return
 
         # Сохраняем заявку в БД
@@ -84,7 +91,7 @@ async def topup_amount_entered(message: Message, state: FSMContext):
         f"🪙 На адрес:\n<code>{admin_user.wallet_address}</code>\n\n"
         f"⚠️ Заявка будет проверяться в течение часа. "
         f"После подтверждения баланс пополнится автоматически.",
-        reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="💰 Пополнить"))
+        reply_markup=main_kb()
     )
 
     await state.clear()
