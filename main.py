@@ -6,7 +6,8 @@ from aiogram.client.default import DefaultBotProperties
 from config import BOT_TOKEN
 from database import init_db
 from handlers.user import start, profile, purchase, topup, support
-from handlers.admin import broadcast, set_wallet, support_panel, manage_products, topup_admin, delete_all, Admin_text
+from handlers.admin import broadcast, set_wallet, support_panel, manage_products, topup_admin, delete_all, Admin_text, \
+    change_text
 from utils.topup_checker import check_topups
 
 # Настройка логгера
@@ -39,6 +40,7 @@ async def main():
         topup_admin.router,
         delete_all.router,
         Admin_text.router,
+        change_text.router,
     )
     from keyboards.user_kb import router as user_kb_router
 
