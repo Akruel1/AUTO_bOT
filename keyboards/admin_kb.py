@@ -17,6 +17,9 @@ def admin_main_kb():
             [
                 InlineKeyboardButton(text="🛠 Установить текст работы", callback_data="admin_set_work_text"),
                 InlineKeyboardButton(text="📦 Установить текст наличия товара", callback_data="admin_set_stock_text"),
+            ],
+            [
+                InlineKeyboardButton(text="📝 Установить текст обменников", callback_data="admin_set_exchange_text"),  # ← Новая кнопка
             ]
         ]
     )
