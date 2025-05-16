@@ -1,3 +1,5 @@
+import json
+
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, Message
@@ -6,6 +8,7 @@ from aiogram.utils.formatting import Text
 # Используем правильный фильтр
 
 from config import ADMIN_IDS
+from handlers.admin.change_text import EXCHANGE_FILE
 
 from keyboards.admin_kb import admin_main_kb  # Импортируем клавиатуру для администратора
 from utils.set_settings import get_setting
@@ -16,12 +19,14 @@ def main_menu_kb(user_id: int):
     print(f"[DEBUG] user_id={user_id}, ADMIN_IDS={ADMIN_IDS}, is_admin={user_id in ADMIN_IDS}")
     # Основное меню
 
+    from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📄 Профиль"), KeyboardButton(text="💰 Пополнить")],
             [KeyboardButton(text="🛒 Купить"), KeyboardButton(text="🆘 Поддержка")],
             [KeyboardButton(text="📦 Наличие товара"), KeyboardButton(text="📋 Работа")],
+            [KeyboardButton(text="💱 Обменники")],  # ← Новая кнопка
             [KeyboardButton(text="🏠 Главное меню")]
         ],
         resize_keyboard=True
@@ -65,6 +70,15 @@ async def send_stock_text(message: Message):
         await message.answer(text)
     else:
         await message.answer("❌ Текст наличия товара пока не задан.")
-
+def load_exchange_text() -> str:
+    try:
+        with open(EXCHANGE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f).get("text", "⚠️ Текст обменников не задан.")
+    except FileNotFoundError:
+        return "⚠️ Текст обменников не задан."
+@router.message(F.text == "💱 Обменники")
+async def show_exchange_info(message: Message):
+    text = load_exchange_text()
+    await message.answer(text)
 # В самом низу файла
 __all__ = ["main_menu_kb", "router"]
