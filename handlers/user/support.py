@@ -23,6 +23,7 @@ async def ask_support_message(message: Message, state: FSMContext):
 @router.message(SupportFSM.waiting_for_message)
 async def handle_support_message(message: Message, state: FSMContext):
     user_id = message.from_user.id
+    username = message.from_user.username
     support_message = message.text
 
     async with async_session() as session:
@@ -37,7 +38,8 @@ async def handle_support_message(message: Message, state: FSMContext):
     for admin_id in ADMIN_IDS:
         await message.bot.send_message(
             admin_id,
-            f"🆘 Новое сообщение в поддержку от <code>{user_id}</code>:\n\n"
-            f"<i>{support_message}</i>\n\n"
-            f"Введите <b>/support</b> чтобы просмотреть все сообщения."
+          f"🆘 Новое сообщение в поддержку от <code>{user_id}</code> (@{username if username else 'нет username'}):\n\n"
+          f"<i>{support_message}</i>\n\n"
+          f"Введите <b>/support</b> чтобы просмотреть все сообщения."
+
         )
