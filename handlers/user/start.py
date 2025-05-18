@@ -12,6 +12,9 @@ from keyboards.user_kb import main_menu_kb  # Импортируем клави�
 
 router = Router()
 
+import html
+from sqlalchemy.exc import SQLAlchemyError
+
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     tg_id = message.from_user.id
@@ -30,10 +33,13 @@ async def cmd_start(message: Message):
         except SQLAlchemyError as e:
             error_msg = str(e.__dict__.get('orig', e))
             logger.error(f"Database error on start: {error_msg}")
-            await message.answer(f"❌ Ошибка базы данных: {error_msg}")
+            escaped_error_msg = html.escape(error_msg)
+            await message.answer(f"❌ Ошибка базы данных: {escaped_error_msg}", parse_mode='HTML')
             return
 
     keyboard = main_menu_kb(tg_id)
+    
+
 
     await message.bot.send_chat_action(chat_id=message.chat.id, action="upload_photo")
 
