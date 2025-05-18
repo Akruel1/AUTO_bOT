@@ -48,7 +48,7 @@ class Purchase(Base):
 class TopUpRequest(Base):
     __tablename__ = "topup_requests"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(BigInteger, ForeignKey("users.id"))
     amount_usd = Column(Float)
     expected_ltc = Column(Float)
     status = Column(String, default="waiting")  # waiting, confirmed, expired
