@@ -58,7 +58,7 @@ class TopUpRequest(Base):
 class SupportMessage(Base):
     __tablename__ = "support_messages"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer)
+    user_id = Column(BigInteger)
     message = Column(Text)
     is_resolved = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
