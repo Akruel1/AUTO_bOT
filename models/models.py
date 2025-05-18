@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Integer, Float, String, Boolean, ForeignKey, DateTime, Text, Numeric, DECIMAL
+from sqlalchemy import Column, Integer, Float, String, Boolean, ForeignKey, DateTime, Text, Numeric, DECIMAL, BigInteger
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
@@ -8,7 +8,7 @@ from database import Base
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    tg_id = Column(Integer, unique=True)
+    tg_id = Column(BigInteger, unique=True)
     username = Column(String)
     balance_usd = Column(Float, default=0.0)
     is_admin = Column(Boolean, default=False)
