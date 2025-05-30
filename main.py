@@ -44,7 +44,7 @@ async def main():
     )
     from keyboards.user_kb import router as user_kb_router
 
-    # где-то ниже:
+   
     dp.include_router(user_kb_router)
 
     # Запуск проверки пополнений
