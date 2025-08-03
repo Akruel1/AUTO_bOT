@@ -27,6 +27,9 @@ def category_kb(categories: list, city: str) -> InlineKeyboardMarkup:
 
 # Генерация клавиатуры для выбора товара
 def product_kb(products: list, city: str, category: str) -> InlineKeyboardMarkup:
+    import random
+    from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
     if not products:
         return InlineKeyboardMarkup(inline_keyboard=[])
 
@@ -38,10 +41,12 @@ def product_kb(products: list, city: str, category: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
+
 # Подтверждение покупки товара
 def confirm_purchase_kb(product_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="✅ Купить", callback_data=f"buy_{product_id}")
     ]])
+
 
 
