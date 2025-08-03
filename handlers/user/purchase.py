@@ -45,13 +45,11 @@ async def select_category(callback: CallbackQuery):
     _, city, category = callback.data.split("_")
 
     async with async_session() as session:
-        # Получаем все товары для выбранного города и категории
         result = await session.execute(
             select(Product).where(Product.city == city, Product.category == category)
         )
         products = result.scalars().all()
 
-        # Фильтруем товары, у которых есть хотя бы одно фото
         products_with_photos = []
         for product in products:
             res = await session.execute(
@@ -65,7 +63,11 @@ async def select_category(callback: CallbackQuery):
         await callback.message.edit_text("Нет доступных товаров в этом городе и категории.")
         return
 
-    await callback.message.edit_text("Выберите товар:", reply_markup=product_kb(products_with_photos))
+    await callback.message.edit_text("Выберите товар:")
+    await callback.message.edit_reply_markup(
+        reply_markup=product_kb(products_with_photos, city, category)
+    )
+
 
 
 
@@ -177,6 +179,7 @@ async def make_purchase(callback: CallbackQuery):
 
         # Удаляем сообщение с подтверждением покупки, оно уже не нужно
         await callback.message.delete()
+
 
 
 
