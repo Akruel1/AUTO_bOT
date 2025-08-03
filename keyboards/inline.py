@@ -26,13 +26,15 @@ def category_kb(categories: list, city: str) -> InlineKeyboardMarkup:
 
 
 # Генерация клавиатуры для выбора товара
-def product_kb(products: list) -> InlineKeyboardMarkup:
-    keyboard = []
-    for product in products:
-        keyboard.append([InlineKeyboardButton(
-            text=f"{product.name} — ${product.price_usd:.2f}",
-            callback_data=f"product_{product.id}"
-        )])
+def product_kb(products: list, city: str, category: str) -> InlineKeyboardMarkup:
+    if not products:
+        return InlineKeyboardMarkup(inline_keyboard=[])
+
+    product = random.choice(products)
+    keyboard = [
+        [InlineKeyboardButton(text=f"{product.name} — {product.price}$", callback_data=f"buy_{product.id}")],
+        [InlineKeyboardButton(text="🔄 Следующий товар", callback_data=f"next_product_{city}_{category}")]
+    ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
@@ -41,3 +43,4 @@ def confirm_purchase_kb(product_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="✅ Купить", callback_data=f"buy_{product_id}")
     ]])
+
