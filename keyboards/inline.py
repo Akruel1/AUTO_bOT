@@ -32,7 +32,7 @@ def product_kb(products: list, city: str, category: str) -> InlineKeyboardMarkup
 
     product = random.choice(products)
     keyboard = [
-        [InlineKeyboardButton(text=f"{product.name} — {product.price}$", callback_data=f"buy_{product.id}")],
+        [InlineKeyboardButton(text=f"{product.name} — {product.price_usd}$", callback_data=f"buy_{product.id}")],
         [InlineKeyboardButton(text="🔄 Следующий товар", callback_data=f"next_product_{city}_{category}")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
@@ -43,4 +43,5 @@ def confirm_purchase_kb(product_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="✅ Купить", callback_data=f"buy_{product_id}")
     ]])
+
 
