@@ -1,7 +1,9 @@
-from aiogram import Router, F
+from aiogram import Router, F 
 from aiogram.types import Message, ContentType
+
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+
 from config import ADMIN_IDS
 from models.models import Product, ProductPhoto
 from database import async_session
@@ -9,13 +11,14 @@ from keyboards.admin_kb import admin_main_kb
 
 router = Router()
 
-# Состояния для FSM с добавленным состоянием category
+# Состояния для FSM с добавленным состоянием district
 class ProductForm(StatesGroup):
     name = State()
     description = State()
     price = State()
     category = State()
     city = State()
+    district = State()  # новое состояние для района
     photos = State()
 
 # Проверка прав администратора
@@ -64,6 +67,12 @@ async def process_category(message: Message, state: FSMContext):
 @router.message(ProductForm.city)
 async def process_city(message: Message, state: FSMContext):
     await state.update_data(city=message.text)
+    await message.answer("Введите район (district) товара:")
+    await state.set_state(ProductForm.district)
+
+@router.message(ProductForm.district)
+async def process_district(message: Message, state: FSMContext):
+    await state.update_data(district=message.text)
     await message.answer("Теперь отправьте фотографию товара (вы можете отправить несколько).")
     await state.set_state(ProductForm.photos)
 
@@ -75,6 +84,7 @@ async def process_photos(message: Message, state: FSMContext):
     price = data['price']
     category = data['category']
     city = data['city']
+    district = data.get('district', 'Центр')  # если вдруг нет, по умолчанию
 
     file_id = message.photo[-1].file_id
 
@@ -84,7 +94,8 @@ async def process_photos(message: Message, state: FSMContext):
             description=description,
             price_usd=price,
             city=city,
-            category=category
+            category=category,
+            district=district  # добавляем район
         )
         session.add(product)
         await session.commit()
