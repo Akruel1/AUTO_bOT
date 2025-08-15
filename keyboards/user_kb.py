@@ -58,6 +58,8 @@ async def send_work_text(message: Message):
         await message.answer("❌ Текст работы пока не задан.")
 
 
+import re
+
 @router.message(F.text == "📦 Наличие товара")
 async def send_stock_list(message: Message):
     bot_username = "Graff_montecristobot"
@@ -84,7 +86,7 @@ async def send_stock_list(message: Message):
             data[city][district][name] = {"count": 0, "price": float(p.price_usd)}
         data[city][district][name]["count"] += 1
 
-    # Компактная карта эмодзи
+    # Карта эмодзи
     emoji_map = {
         "lsd250mg": "🖼",
         "lsd125mg": "🖼",
@@ -94,10 +96,15 @@ async def send_stock_list(message: Message):
         "ск1г": "💎",
     }
 
-    def get_emoji(name: str) -> str:
-        """Нормализуем название товара и ищем эмодзи."""
+    def normalize_name(name: str) -> str:
+        # убираем пробелы, приводим к нижнему регистру
         key = name.lower().replace(" ", "")
-        return emoji_map.get(key, "❓")
+        # заменяем 05 на 0.5 перед "г"
+        key = re.sub(r"(?<=\D)05(?=г)", "0.5", key)
+        return key
+
+    def get_emoji(name: str) -> str:
+        return emoji_map.get(normalize_name(name), "❓")
 
     text = (
         "🔥 <b>Добро пожаловать в лучший магазин качественных товаров!</b>\n\n"
@@ -145,6 +152,7 @@ async def send_stock_list(message: Message):
 
 
 
+
 def load_exchange_text() -> str:
     try:
         with open(EXCHANGE_FILE, "r", encoding="utf-8") as f:
@@ -159,4 +167,5 @@ async def show_exchange_info(message: Message):
 
 # В самом низу файла
 __all__ = ["main_menu_kb", "router"]
+
 
