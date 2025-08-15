@@ -70,7 +70,7 @@ async def send_stock_list(message: Message):
         await message.answer("❌ Товары не найдены.")
         return
 
-    # Группируем товары по городу и району, внутри — по названию с подсчётом количества и ценой
+    # Группируем товары по городу и району
     data = {}  # {city: {district: {product_name: {"count": int, "price": float}}}}
 
     for p in products:
@@ -84,11 +84,20 @@ async def send_stock_list(message: Message):
             data[city][district][name] = {"count": 0, "price": float(p.price_usd)}
         data[city][district][name]["count"] += 1
 
+    # Компактная карта эмодзи
     emoji_map = {
-        "LSD 250 mg": "🖼",
-        "LSD 125 mg": "🖼",
-        # Добавь свои эмодзи для товаров сюда
+        "lsd250mg": "🖼",
+        "lsd125mg": "🖼",
+        "шишки0.5г": "🌿",
+        "шишки1г": "🌿",
+        "ск0.5г": "💎",
+        "ск1г": "💎",
     }
+
+    def get_emoji(name: str) -> str:
+        """Нормализуем название товара и ищем эмодзи."""
+        key = name.lower().replace(" ", "")
+        return emoji_map.get(key, "❓")
 
     text = (
         "🔥 <b>Добро пожаловать в лучший магазин качественных товаров!</b>\n\n"
@@ -104,7 +113,7 @@ async def send_stock_list(message: Message):
             for name, info in products_dict.items():
                 price = round(info["price"], 2)
                 low_stock = "⚠️" if info["count"] < 10 else ""
-                emoji = emoji_map.get(name, "❓")
+                emoji = get_emoji(name)
 
                 buy_link = f"<a href='https://t.me/{bot_username}?start=buy'>Купить</a>"
 
@@ -134,6 +143,8 @@ async def send_stock_list(message: Message):
 
 
 
+
+
 def load_exchange_text() -> str:
     try:
         with open(EXCHANGE_FILE, "r", encoding="utf-8") as f:
@@ -148,3 +159,4 @@ async def show_exchange_info(message: Message):
 
 # В самом низу файла
 __all__ = ["main_menu_kb", "router"]
+
